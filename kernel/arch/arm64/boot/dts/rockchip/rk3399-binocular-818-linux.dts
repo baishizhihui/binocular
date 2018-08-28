@@ -357,9 +357,9 @@
 		BT,reset_gpio    = <&gpio4 RK_PA3 GPIO_ACTIVE_HIGH>; /* GPIO0_B1 */
 		BT,wake_gpio     = <&gpio2 26 GPIO_ACTIVE_HIGH>; /* GPIO2_D2 */
 		BT,wake_host_irq = <&gpio4 RK_PA6 GPIO_ACTIVE_HIGH>; /* GPIO0_A4 */
-		status = "okay";
+		status = "disabled";
 	};
-
+/*
 	rk_headset {
 	        status = "disabled";
 		compatible = "rockchip_headset";
@@ -368,6 +368,7 @@
 		pinctrl-0 = <&hp_det>;
 		io-channels = <&saradc 2>;
 	};
+*/
 };
 
 &backlight {
@@ -931,11 +932,11 @@
 	num-lanes = <4>;
 	pinctrl-names = "default";
 	pinctrl-0 = <&pcie_clkreqn>;
-	status = "okay";
+	status = "disabled";
 };
 
 &pcie_phy {
-	status = "okay";
+	status = "disabled";
 };
 
 &pmu_io_domains {
@@ -1036,7 +1037,7 @@
 };
 
 &spdif {
-	status = "okay";
+	status = "disabled";
 	#sound-dai-cells = <0>;
 };
 
