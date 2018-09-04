@@ -52,6 +52,7 @@ fi
 if [ $FLASH_TYPE = boot ]
 then
 	sudo $UPGRADETOOL di -b $BOOT
+	sudo $UPGRADETOOL rd
 fi
 
 if [ $FLASH_TYPE = oem ]
@@ -62,5 +63,6 @@ fi
 if [ $FLASH_TYPE = rootfs ]
 then
 	sudo $UPGRADETOOL di -rootfs $ROOTFS
+	sudo $UPGRADETOOL rd
 fi
 
