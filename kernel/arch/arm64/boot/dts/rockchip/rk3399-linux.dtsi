@@ -174,9 +174,9 @@
 				/* cif_data3 */
 				<2 3 RK_FUNC_3 &pcfg_pull_none>,
 				/* cif_data4 */
-				<2 4 RK_FUNC_3 &pcfg_pull_none>,
+				<2 4 RK_FUNC_GPIO &pcfg_pull_none>,
 				/* cif_data5 */
-				<2 5 RK_FUNC_3 &pcfg_pull_none>,
+				<2 5 RK_FUNC_GPIO &pcfg_pull_none>,
 				/* cif_data6 */
 				<2 6 RK_FUNC_3 &pcfg_pull_none>,
 				/* cif_data7 */
