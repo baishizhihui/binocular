@@ -49,6 +49,10 @@ void app_gpio_init(void)
 	bndriver_gpio_pin_init(FAN_EN_PIN, 1);//fan
 	bndriver_gpio_pin_init(LED_GREEN_PIN, 1);//led1
 	bndriver_gpio_pin_init(LED_RED_PIN, 1);//led2
+
+	bndriver_gpio_write(FAN_EN_PIN, 1);
+	bndriver_gpio_write(LED_RED_PIN, 1);
+	bndriver_gpio_write(LED_GREEN_PIN, 1);
 }
 
 void app_fan_set(int flag)

@@ -29,10 +29,13 @@
 
 extern int test_init(char *id);
 extern int test_main(int arg);
-
-
+extern int test_main_function(int cmd);
+extern int test_burn_in_running(void);
+extern int app_dd_speed_test(char *path, char *outputfile);
 
 extern int board_function_test(int flag, char *buf);
+extern int net_file_rw_test(void);
+extern int net_file_new(void);
 
 extern void auto_test_init(void);
 extern int fun_test(int flag, char *buf);

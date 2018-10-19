@@ -29,7 +29,7 @@
 #include <sys/shm.h> 
 #include "driver.h" 
 #include "app.h"
-
+#include "test.h"
 
 int main(int argc, char **argv)
 {
@@ -40,6 +40,11 @@ int main(int argc, char **argv)
 	{
 		sprintf(buf, "%s", argv[1]);
 		printf("%s\n", buf);
+	}
+	else if(argc == 3)
+	{
+		test_main_function(atoi(argv[2]));
+		return 1;
 	}
 	ret = test_init(buf);
 	if(ret > 0)
