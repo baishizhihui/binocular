@@ -830,6 +830,7 @@ int aptina_camera_module_s_power(struct v4l2_subdev *sd, int on)
 				APTINA_CAMERA_MODULE_SW_STANDBY;
 		}
 		if (cam_mod->state == APTINA_CAMERA_MODULE_SW_STANDBY) {
+			#if 0
 			ret = pltfrm_camera_module_set_pin_state(
 				&cam_mod->sd,
 				PLTFRM_CAMERA_MODULE_PIN_PD,
@@ -844,6 +845,7 @@ int aptina_camera_module_s_power(struct v4l2_subdev *sd, int on)
 				&cam_mod->sd,
 				PLTFRM_CAMERA_MODULE_PIN_PWR,
 				PLTFRM_CAMERA_MODULE_PIN_STATE_INACTIVE);
+			#endif
 
 			if (!IS_ERR_VALUE(ret))
 				cam_mod->state =
@@ -1285,10 +1287,10 @@ long aptina_camera_module_ioctl(struct v4l2_subdev *sd,
 		timings->exposure_valid_frame[1] =
 			cam_mod->custom.exposure_valid_frame[1];
 
-		/*
-		 *timings->exp_time = cam_mod->exp_config.exp_time;
-		 *timings->gain = cam_mod->exp_config.gain;
-		 */
+		
+		 timings->exp_time = cam_mod->exp_config.exp_time;
+		 timings->gain = cam_mod->exp_config.gain;
+		 
 		if (cam_mod->active_config) {
 			timings->max_exp_gain_h = cam_mod->active_config->max_exp_gain_h;
 			timings->max_exp_gain_l = cam_mod->active_config->max_exp_gain_l;
@@ -1566,7 +1568,7 @@ int aptina_camera_module_init(struct aptina_camera_module *cam_mod,
 
 	ret = pltfrm_camera_module_set_pin_state(&cam_mod->sd,
 				PLTFRM_CAMERA_MODULE_PIN_PD,
-				PLTFRM_CAMERA_MODULE_PIN_STATE_INACTIVE);
+				PLTFRM_CAMERA_MODULE_PIN_STATE_ACTIVE);
 	ret = pltfrm_camera_module_set_pin_state(&cam_mod->sd,
 				PLTFRM_CAMERA_MODULE_PIN_RESET,
 				PLTFRM_CAMERA_MODULE_PIN_STATE_ACTIVE);
