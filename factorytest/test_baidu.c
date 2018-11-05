@@ -40,42 +40,6 @@ extern char g_config_wifi_ip[64];
 extern char g_config_wifi_gw[64];
 extern char g_config_sn[64];
 
-int test_burn_in_running(void)
-{
-	char cmd_buf[1024];
-	char time_date[128];
-	char time_time[128];
-	if(app_lan_test(2) < 0)
-	{
-		printf("\033[1;31;40m lan connect Error!!!!! \033[0m\n");
-		return -1;
-	}
-
-	auto_test_init();
-
-	memset(time_date, 0, sizeof(time_date));
-	memset(time_time, 0, sizeof(time_time));
-	bndriver_get_data_time(time_date, time_time);
-
-	memset(cmd_buf, 0, sizeof(cmd_buf));
-	sprintf(cmd_buf, "echo \"[%s %s]burnin test:\" >> /home/linaro/burnintest-%s.txt", time_date, time_time, g_board_id);
-	system(cmd_buf);
-
-	while(1)
-	{
-		memset(cmd_buf, 0, sizeof(cmd_buf));
-		sprintf(cmd_buf, "ping -c %d %s >> /home/linaro/burnintest-%s.txt", 10, g_config_service_ip, g_board_id);
-		system(cmd_buf);
-
-		memset(cmd_buf, 0, sizeof(cmd_buf));
-		sprintf(cmd_buf, "cat /sys/class/thermal/thermal_zone0/temp >> /home/linaro/burnintest-%s.txt", g_board_id);
-		system(cmd_buf);
-
-		bndriver_secondSleep(30);
-	}
-	return 0;
-}
-
 int test_init(char *id)
 {
 	int i;
@@ -83,14 +47,14 @@ int test_init(char *id)
 	printf("\033[1;31;40m factory test for baidu V1.0 - ID:%s\033[0m\n", id);
 	memset(g_board_id, 0, sizeof(g_board_id));
 	strcpy(g_board_id, id);
-	
+
 	app_gpio_init();
+
 	if(app_tfcard_mount(0) < 0)
 	{
 		printf("\033[1;31;40m TF card Error!!!!! \033[0m\n");
 		return -1;
 	}
-
 	memset(g_config_service_ip, 0, sizeof(g_config_service_ip));
 	memset(g_config_wifi_name, 0, sizeof(g_config_wifi_name));
 	memset(g_config_wifi_pwd, 0, sizeof(g_config_wifi_pwd));
@@ -106,7 +70,7 @@ int test_init(char *id)
 		return -1;
 	}
 #else
-	strcpy(g_config_sn, "SN20180921");
+	strcpy(g_config_sn, "20180921");
 	strcpy(id, "9999");
 #endif
 
@@ -145,20 +109,39 @@ int test_init(char *id)
 	return 1;
 }
 
+static int g_testmode = 0;
 static int g_test_led_flag = 0;
 void auto_test_timer_callback(void)
 {
-	if(g_test_led_flag)
+	if(g_testmode == 1)
 	{
-		g_test_led_flag = 0;
-		app_red_led_set(0);
-		app_green_led_set(0);
+		if(g_test_led_flag)
+		{
+			g_test_led_flag = 0;
+			app_red_led_set(0);
+			app_green_led_set(0);
+		}
+		else
+		{
+			g_test_led_flag = 1;
+			app_red_led_set(1);
+			app_green_led_set(1);
+		}
 	}
-	else
+	else if(g_testmode == 2)
 	{
-		g_test_led_flag = 1;
-		app_red_led_set(1);
-		app_green_led_set(1);
+		if(g_test_led_flag)
+		{
+			g_test_led_flag = 0;
+			app_red_led_set(0);
+			app_green_led_set(1);
+		}
+		else
+		{
+			g_test_led_flag = 1;
+			app_red_led_set(1);
+			app_green_led_set(0);
+		}
 	}
 }
 
@@ -166,12 +149,13 @@ void auto_test_timer_callback(void)
 int test_main(int arg)
 {
 	int a,b;
+	g_testmode = 1;
 	while(1)
 	{
 		printf("\033[1;32;40m *********************************** \033[0m\n");
 		printf("\033[1;32;40m *  press number and enter start test \033[0m\n");		
 		printf("\033[1;32;40m *  1. test all \033[0m\n");
-		printf("\033[1;32;40m *  2. test camera \033[0m\n");	
+		printf("\033[1;32;40m *  2. test all & performance \033[0m\n");	
 		printf("\033[1;32;40m *  3. test usb \033[0m\n");
 		printf("\033[1;32;40m *  4. test wifi \033[0m\n");
 		printf("\033[1;32;40m *  5. test lan \033[0m\n");
@@ -192,7 +176,9 @@ int test_main(int arg)
 			printf("\033[1;32;40m *********************************** \033[0m\n");
 			auto_test_init();
 			app_fan_set(1);
+			#ifdef ADD_IMU_TEST
 			board_function_test(TEST_FUN_IMU, NULL);
+			#endif
 			board_function_test(TEST_FUN_USB, NULL);
 			board_function_test(TEST_FUN_WIFI, NULL);
 			board_function_test(TEST_FUN_LAN, NULL);
@@ -201,8 +187,30 @@ int test_main(int arg)
 		}
 		else if(2 == a)
 		{
-			printf("start camera:\n");	
-			printf("--------------------------------\n");	
+			printf("\033[1;32;40m *********************************** \033[0m\n");
+			printf("\033[1;31;40m *  start test all...... \033[0m\n");		
+			printf("\033[1;32;40m *********************************** \033[0m\n");
+			auto_test_init();
+			app_fan_set(1);
+			#ifdef ADD_IMU_TEST
+			board_function_test(TEST_FUN_IMU, NULL);
+			#endif
+			board_function_test(TEST_FUN_USB, NULL);
+			board_function_test(TEST_FUN_WIFI, NULL);
+			board_function_test(TEST_FUN_LAN, NULL);
+			board_function_test(TEST_FUN_TF_CARD, NULL);
+			board_function_result();
+
+			printf("start performance test:\n");	
+			printf("--------------------------------\n");
+			app_fan_set(1);
+			board_function_test(TEST_FUN_WIFI_SPEED, NULL);
+			board_function_test(TEST_FUN_LAN_SPEED, NULL);
+			board_function_test(TEST_FUN_USB_SPEED, NULL);
+			board_function_test(TEST_FUN_TFCARD_SPEED, NULL);
+			board_function_test(TEST_FUN_EMMC_SPEED, NULL);
+			app_all_speed_result();
+	
 		}		
 		else if(3 == a)
 		{
@@ -322,4 +330,155 @@ int test_main(int arg)
 		}			
 	}
 	return 1;	
+}
+
+int test_main_function(int cmd)
+{
+	int a,b;
+	int size;
+	char ret_buf[128];
+	app_gpio_init();	
+	g_testmode = 2;	
+	cpu_freq_init();
+	size = bndriver_file_getsize("/home/linaro/ip.txt");
+	if(size)
+		bndriver_file_read("/home/linaro/ip.txt", g_config_service_ip, 0, size);
+
+	while(1)
+	{
+		printf("\033[1;32;40m *********************************** \033[0m\n");
+		printf("\033[1;32;40m *  press number and enter start test \033[0m\n");		
+		printf("\033[1;32;40m *  1. test usb sda \033[0m\n");
+		printf("\033[1;32;40m *  2. test usb sdb \033[0m\n");	
+		printf("\033[1;32;40m *  3. test usb sdc \033[0m\n");
+		printf("\033[1;32;40m *  4. test usb all \033[0m\n");
+		printf("\033[1;32;40m *  5. test tf card \033[0m\n");
+		printf("\033[1;32;40m *  6. test lan \033[0m\n");
+		printf("\033[1;32;40m *  7. test wifi \033[0m\n");					
+		printf("\033[1;32;40m *  0. test exit \033[1m\n");
+		printf("\033[1;32;40m *********************************** \033[0m\n");	
+		printf("\033[1;32;40m # \033[0m");
+		scanf("%d",&a); 
+		if(1 == a)
+		{
+			memset(ret_buf, 0, sizeof(ret_buf));
+			if(app_usb_sda1_test(ret_buf) < 0)
+			{
+				printf("\033[1;31;40m [fail] test sda fail\033[0m \n");
+			}
+			else
+			{
+				app_usb_sda1_speed_test(1);
+				printf("[success] test sda success\n");
+			}
+		}
+		else if(2 == a)
+		{
+			memset(ret_buf, 0, sizeof(ret_buf));
+			if(app_usb_sdb1_test(ret_buf) < 0)
+			{
+				printf("\033[1;31;40m [fail] test sdb fail\033[0m \n");
+			}
+			else
+			{
+				app_usb_sdb1_speed_test(1);
+				printf("[success] test sdb success\n");
+			}
+		}
+		else if(3 == a)
+		{
+			memset(ret_buf, 0, sizeof(ret_buf));
+			if(app_usb_sdc1_test(ret_buf) < 0)
+			{
+				printf("\033[1;31;40m [fail] test sdc fail\033[0m \n");
+			}
+			else
+			{
+				app_usb_sdc1_speed_test(1);
+				printf("[success] test sdc success\n");
+			}
+		}
+		else if(4 == a)
+		{
+			memset(ret_buf, 0, sizeof(ret_buf));
+			if(app_usb_sda1_test(ret_buf) < 0)
+			{
+				printf("\033[1;31;40m [fail] test sda fail\033[0m \n");
+			}
+			else
+			{
+				app_usb_sda1_speed_test(1);
+				printf("[success] test sda success\n");
+			}
+			memset(ret_buf, 0, sizeof(ret_buf));
+			if(app_usb_sdb1_test(ret_buf) < 0)
+			{
+				printf("\033[1;31;40m [fail] test sdb fail\033[0m \n");
+			}
+			else
+			{
+				app_usb_sdb1_speed_test(1);
+				printf("[success] test sdb success\n");
+			}
+			memset(ret_buf, 0, sizeof(ret_buf));
+			if(app_usb_sdc1_test(ret_buf) < 0)
+			{
+				printf("\033[1;31;40m [fail] test sdc fail\033[0m \n");
+			}
+			else
+			{
+				app_usb_sdc1_speed_test(1);
+				printf("[success] test sdc success\n");
+			}
+		}
+		else if(5 == a)
+		{
+			if(app_tfcard_mount(0) < 0)
+			{
+				printf("\033[1;31;40m TF card Error!!!!! \033[0m\n");
+			}
+			else
+			{
+				app_tfcard_speed_test(1);
+				printf("[success] test tfcard success\n");
+			}
+		}
+		else if(6 == a)
+		{
+			if(app_lan_test(10) >= 0)
+			{
+				if(net_file_rw_test() < 0)
+				{
+					printf("\033[1;31;40m [fail] test lan big file error\033[0m \n");
+					break;
+				}
+				printf("[success] test lan success\n");
+				break;
+			}
+			printf("\033[1;31;40m [fail] test lan\033[0m \n");			
+		}
+		else if(7 == a)
+		{
+			if(app_wifi_test(10) >= 0)
+			{
+				printf("[success] test wifi success\n");
+				break;
+			}
+			printf("\033[1;31;40m [fail] test wifi\033[0m \n");			
+		}
+		else if(86 == a)
+		{
+			net_file_new();
+		}
+		else if(90 == a)
+		{
+			double a, b;
+			bndriver_get_dd_speed_num("iiiii 70.9 MB/s   oooooo 12344.9 MB/s", 20, &a, &b);
+		}		
+		else if(0 == a)
+		{
+			break;
+		}
+	}	
+	return 0;
 }

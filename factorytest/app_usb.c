@@ -31,24 +31,75 @@
 #include "app.h"
 #include "test.h"
 
+int app_usb_mount_dev(char *point)
+{
+	int i;
+	char cmd_buf[128];
+	int templen;
+	int ret;
+	char tempbuf[128];
+	char *p;
+	char *psearch;
+	memset(cmd_buf, 0, sizeof(cmd_buf));
+	sprintf(cmd_buf, "ls %s* > /tmp/usbmount.txt", point);
+	system(cmd_buf);	
+
+	templen = bndriver_file_getsize("/tmp/usbmount.txt");
+	if(templen == 0)
+	{
+		return 0;
+	}
+	memset(tempbuf, 0, sizeof(tempbuf));
+	bndriver_file_read("/tmp/usbmount.txt", tempbuf, 0, templen);
+	psearch = tempbuf;
+
+	for(i = 0; i < 10; i++)
+	{
+		p = strstr(psearch, point);
+		if(p == NULL)
+		{
+			return 0;
+		}	
+		//printf("find %s,%d\n",p,strlen(point));
+		p += strlen(point);
+		if((*p <= '9')&&(*p >= '1'))
+		{
+			return (*p);
+		}
+		psearch = p;	
+	}
+
+	return 0;
+}
+
+
+
 
 int app_usb_sda1_test(char *buf)
 {
 	int count = 0;
+	char num = 0;
+	char cmd_buf[128];
 	if(bndriver_file_getsize("/tmp/sda1/autotestconfig.txt") <= 0)
 	{
 		system("mkdir /tmp/sda1");
 		system("sudo chmod -R 777 /tmp/sda1");
 		system("sudo chown linaro:linaro /tmp/sda1");
-		system("ls /dev/sd* | grep \"/dev/sda1\" -c > /tmp/autotestsda1.txt");
-		count = bndriver_file_context_num("/tmp/autotestsda1.txt");
-		if(count < 1)
+		num = app_usb_mount_dev("/dev/sda");
+		printf("even find /dev/sda%d\n", num-'0');
+		if(0 == num)
 		{
-			printf("\033[1;31;40m [fail] test usb sda1 fail\033[0m \n");
-			sprintf(buf, "usb sda1 test fail--%d", count);
+			printf("\033[1;31;40m [fail] test usb sda fail\033[0m \n");
+			sprintf(buf, "usb sda test fail--%d", num-'0');
 			return -1;
 		}
-		system("sudo mount -o umask=000 /dev/sda1 /tmp/sda1");		
+		memset(cmd_buf, 0, sizeof(cmd_buf));
+		sprintf(cmd_buf, "sudo umount /dev/sda%d", num-'0');
+		system(cmd_buf);
+
+		memset(cmd_buf, 0, sizeof(cmd_buf));
+		sprintf(cmd_buf, "sudo mount -o umask=000 /dev/sda%d /tmp/sda1", num-'0');
+		system(cmd_buf);		
 	}
 	if(bndriver_file_getsize("/tmp/sda1/autotestconfig.txt") <= 0)
 	{
@@ -70,20 +121,28 @@ int app_usb_sda1_test(char *buf)
 int app_usb_sdb1_test(char *buf)
 {
 	int count = 0;
+	char num = 0;
+	char cmd_buf[128];
 	if(bndriver_file_getsize("/tmp/sdb1/autotestconfig.txt") <= 0)
 	{
 		system("mkdir /tmp/sdb1");
 		system("sudo chmod -R 777 /tmp/sdb1");
 		system("sudo chown linaro:linaro /tmp/sdb1");
-		system("ls /dev/sd* | grep \"/dev/sdb1\" -c > /tmp/autotestsdb1.txt");
-		count = bndriver_file_context_num("/tmp/autotestsdb1.txt");
-		if(count < 1)
+		num = app_usb_mount_dev("/dev/sdb");
+		printf("even find /dev/sdb%d\n", num-'0');
+		if(0 == num)
 		{
-			printf("\033[1;31;40m [fail] test usb sdb1 fail\033[0m \n");
-			sprintf(buf, "usb sdb1 test fail--%d", count);
+			printf("\033[1;31;40m [fail] test usb sdb fail\033[0m \n");
+			sprintf(buf, "usb sdb test fail--%d", num-'0');
 			return -1;
 		}
-		system("sudo mount -o umask=000 /dev/sdb1 /tmp/sdb1");
+		memset(cmd_buf, 0, sizeof(cmd_buf));
+		sprintf(cmd_buf, "sudo umount /dev/sdb%d", num-'0');
+		system(cmd_buf);
+
+		memset(cmd_buf, 0, sizeof(cmd_buf));
+		sprintf(cmd_buf, "sudo mount -o umask=000 /dev/sdb%d /tmp/sdb1", num-'0');
+		system(cmd_buf);
 	}
 	if(bndriver_file_getsize("/tmp/sdb1/autotestconfig.txt") <= 0)
 	{
@@ -105,22 +164,29 @@ int app_usb_sdb1_test(char *buf)
 int app_usb_sdc1_test(char *buf)
 {
 	int count = 0;
+	char num = 0;
+	char cmd_buf[128];
 	if(bndriver_file_getsize("/tmp/sdc1/autotestconfig.txt") <= 0)
 	{
 		
 		system("mkdir /tmp/sdc1");
 		system("sudo chmod -R 777 /tmp/sdc1");
 		system("sudo chown linaro:linaro /tmp/sdc1");
-		printf("mkdir sdc1\n");
-		system("ls /dev/sd* | grep \"/dev/sdc1\" -c > /tmp/autotestsdc1.txt");
-		count = bndriver_file_context_num("/tmp/autotestsdc1.txt");
-		if(count < 1)
+		num = app_usb_mount_dev("/dev/sdc");
+		printf("even find /dev/sdc%d\n", num-'0');
+		if(0 == num)
 		{
-			printf("\033[1;31;40m [fail] test usb sdc1 fail\033[0m \n");
-			sprintf(buf, "usb 2.0 test fail--%d", count);
+			printf("\033[1;31;40m [fail] test usb sdc fail\033[0m \n");
+			sprintf(buf, "usb sdc test fail--%d", num-'0');
 			return -1;
 		}
-		system("sudo mount -o umask=000 /dev/sdc1 /tmp/sdc1");
+		memset(cmd_buf, 0, sizeof(cmd_buf));
+		sprintf(cmd_buf, "sudo umount /dev/sdc%d", num-'0');
+		system(cmd_buf);
+
+		memset(cmd_buf, 0, sizeof(cmd_buf));
+		sprintf(cmd_buf, "sudo mount -o umask=000 /dev/sdc%d /tmp/sdc1", num-'0');
+		system(cmd_buf);
 	}
 	if(bndriver_file_getsize("/tmp/sdc1/autotestconfig.txt") <= 0)
 	{
@@ -137,60 +203,84 @@ int app_usb_sdc1_test(char *buf)
 	return 0;
 }
 
-int app_usb_sda1_speed_test(void)
+int app_usb_sda1_speed_test(int flag)
 {
 	char buf[256];
-	system("echo \"***********************sda1 test**************************\r\n\" > /tmp/speedsda1.txt");
-	system("echo \"sda1 speed test write 100M:\r\n\" >> /tmp/speedsda1.txt");
-	if(app_usb_sda1_test(buf) < 0)
+	printf("***********************usb1 speed test**************************\r\n");
+	if(flag)
 	{
-		system("echo \"sda1 speed test write 100M: fail\r\n\" >> /tmp/speedsda1.txt");
-		return -1;
+		if(app_usb_sda1_test(buf) < 0)
+		{
+			printf("\033[1;31;40m [fail] sda1 speed test fail\033[0m \n");
+			return -1;
+		}
+		app_dd_speed_test("/tmp/sda1", NULL);
 	}
-	system("cd /tmp/sda1");
-	system("sudo dd if=/dev/zero of=./largefile bs=100M count=5 2>>/tmp/speedsda1.txt");
-	system("echo \":\r\n\" >> /tmp/speedsda1.txt");
-	system("echo \"sda1 speed test read 100M:\r\n\" >> /tmp/speedsda1.txt");
-	system("sudo sh -c \"sync && echo 3 > /proc/sys/vm/drop_caches\"");
-	system("sudo dd if=./largefile of=/dev/null bs=100M 2>>/tmp/speedsda1.txt");
+	else 
+	{
+		system("echo \"[BSZH_Module_Result]usb1 test**************************\r\n\" > /tmp/speedsda1.txt");
+		if(app_usb_sda1_test(buf) < 0)
+		{
+			system("echo \"sda1 speed test write 100M: fail\r\n\" >> /tmp/speedsda1.txt");
+			printf("\033[1;31;40m [fail] sda1 speed test fail\033[0m \n");
+			return -1;
+		}
+		app_dd_speed_test("/tmp/sda1", "/tmp/speedsda1.txt");
+	}
 	return 0;
 }
 
-int app_usb_sdb1_speed_test(void)
+int app_usb_sdb1_speed_test(int flag)
 {
 	char buf[256];
-	system("echo \"***********************sdb1 test**************************\r\n\" > /tmp/speedsdb1.txt");
-	system("echo \"sdb1 speed test write 100M:\r\n\" >> /tmp/speedsdb1.txt");
-	if(app_usb_sdb1_test(buf) < 0)
+	printf("***********************usb2 speed test**************************\r\n");
+	if(flag)
 	{
-		system("echo \"sdb1 speed test write 100M: fail\r\n\" >> /tmp/speedsdb1.txt");
-		return -1;
+		if(app_usb_sdb1_test(buf) < 0)
+		{
+			printf("\033[1;31;40m [fail] sdb1 speed test fail\033[0m \n");
+			return -1;
+		}
+		app_dd_speed_test("/tmp/sdb1", NULL);
 	}
-	system("cd /tmp/sdb1");
-	system("sudo dd if=/dev/zero of=./largefile bs=100M count=5 2>>/tmp/speedsdb1.txt");
-	system("echo \":\r\n\" >> /tmp/speedsdb1.txt");
-	system("echo \"sdb1 speed test read 100M:\r\n\" >> /tmp/speedsdb1.txt");
-	system("sudo sh -c \"sync && echo 3 > /proc/sys/vm/drop_caches\"");
-	system("sudo dd if=./largefile of=/dev/null bs=100M 2>>/tmp/speedsdb1.txt");
+	else 
+	{
+		system("echo \"[BSZH_Module_Result]usb2 test**************************\r\n\" > /tmp/speedsdb1.txt");
+		if(app_usb_sdb1_test(buf) < 0)
+		{
+			system("echo \"sdb1 speed test write 100M: fail\r\n\" >> /tmp/speedsdb1.txt");
+			printf("\033[1;31;40m [fail] sdb1 speed test fail\033[0m \n");
+			return -1;
+		}
+		app_dd_speed_test("/tmp/sdb1", "/tmp/speedsdb1.txt");
+	}
 	return 0;
 }
 
-int app_usb_sdc1_speed_test(void)
+int app_usb_sdc1_speed_test(int flag)
 {
 	char buf[256];
-	system("echo \"***********************sdc1 test**************************\r\n\" > /tmp/speedsdc1.txt");
-	system("echo \"sdc1 speed test write 100M:\r\n\" >> /tmp/speedsdc1.txt");
-	if(app_usb_sdc1_test(buf) < 0)
+	printf("***********************usb3 speed test**************************\r\n");
+	if(flag)
 	{
-		system("echo \"sdc1 speed test write 100M:fail\r\n\" >> /tmp/speedsdc1.txt");
-		return -1;
+		if(app_usb_sdc1_test(buf) < 0)
+		{
+			printf("\033[1;31;40m [fail] sdc1 speed test fail\033[0m \n");
+			return -1;
+		}
+		app_dd_speed_test("/tmp/sdc1", NULL);
 	}
-	system("cd /tmp/sdc1");
-	system("sudo dd if=/dev/zero of=./largefile bs=100M count=5 2>>/tmp/speedsdc1.txt");
-	system("echo \":\r\n\" >> /tmp/speedsdc1.txt");
-	system("echo \"sdc1 speed test read 100M:\r\n\" >> /tmp/speedsdc1.txt");
-	system("sudo sh -c \"sync && echo 3 > /proc/sys/vm/drop_caches\"");
-	system("sudo dd if=./largefile of=/dev/null bs=100M 2>>/tmp/speedsdc1.txt");
+	else 
+	{
+		system("echo \"[BSZH_Module_Result]usb3 test**************************\r\n\" > /tmp/speedsdc1.txt");
+		if(app_usb_sdc1_test(buf) < 0)
+		{
+			system("echo \"sdc1 speed test write 100M:fail\r\n\" >> /tmp/speedsdc1.txt");
+			printf("\033[1;31;40m [fail] sdc1 speed test fail\033[0m \n");
+			return -1;
+		}
+		app_dd_speed_test("/tmp/sdc1", "/tmp/speedsdc1.txt");
+	}
 	return 0;
 }
 

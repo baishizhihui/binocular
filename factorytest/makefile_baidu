@@ -28,12 +28,23 @@ SOURCE_FILE2 += app_usb.c
 SOURCE_FILE2 += app_net.c
 SOURCE_FILE2 += main.c
 
+SOURCE_FILE3 += test_imu.c
+SOURCE_FILE3 += test_common.c
+SOURCE_FILE3 += app_imu.c
+SOURCE_FILE3 += app_tfcard.c
+SOURCE_FILE3 += app_gpio.c
+SOURCE_FILE3 += app_usb.c
+SOURCE_FILE3 += app_net.c
+SOURCE_FILE3 += main.c
 
 all:
-	$(CC) $(SOURCE_FILE) -o bin/boteyeonetest $(INCLUDES) $(LIB) -l bsdriver
+	$(CC) $(SOURCE_FILE) -o bin/factorytest $(INCLUDES) $(LIB) -l bsdriver
 
 burnintest:
-	$(CC) $(SOURCE_FILE2) -o bin/boteyeoneburnintest $(INCLUDES) $(LIB) -l bsdriver	
+	$(CC) $(SOURCE_FILE2) -o bin/burnintest $(INCLUDES) $(LIB) -l bsdriver	
+
+imu:
+	$(CC) $(SOURCE_FILE3) -o bin/imu $(INCLUDES) $(LIB) -l bsdriver	
 
 .PHONLY: clean
 
