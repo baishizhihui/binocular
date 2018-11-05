@@ -35,7 +35,7 @@ int app_tfcard_test_main(int flag)
 {
 	int count;
 	char buf[256];
-
+#if 0
 	system("df | grep \"/dev/mmcblk0p1\" -c > /tmp/tfmmcnode.txt");
 	count = bndriver_file_context_num("/tmp/tfmmcnode.txt");
 	if(count == 0)
@@ -48,20 +48,18 @@ int app_tfcard_test_main(int flag)
 	{
 		return -1;
 	}	
-	count = bndriver_file_getsize("/mnt/sdcard/lianjiatestflag.txt");
-	//printf("tf count =%d\n",count);
-	if(count < 10)
+#endif
+	if(bndriver_file_getsize("/tmp/sdcard/autotestconfig.txt") <= 0)
 	{
-		return -1;
+		printf("\033[1;31;40m [fail] test tf mount fail\033[0m \n");
+		return -2;
 	}
-
-	memset(buf, 0, sizeof(buf));
-	bndriver_file_read("/mnt/sdcard/lianjiatestflag.txt", buf, 0, 10);
-	if(0 == memcmp(buf, "1234567890", 10))
+	if(file_rw_test("/tmp/sdcard") < 0)
 	{
-		return 1;
+		printf("\033[1;31;40m [fail] test tfcard rw fail\033[0m \n");
+		return -3;
 	}
-	return -1;
+	return 1;
 }
 
 
@@ -114,16 +112,18 @@ int app_tfcard_mount(int flag)
 }
 
 
-int app_tfcard_speed_test(void)
+int app_tfcard_speed_test(int flag)
 {
-	system("echo \"***********************tf card speed test**************************\r\n\" > /tmp/speedtfcard.txt");
-	system("cd /tmp/sdcard");
-	system("echo \"tf card speed test write 100M:\r\n\" >> /tmp/speedtfcard.txt");
-	system("sudo dd if=/dev/zero of=./largefile bs=100M count=5 2>>/tmp/speedtfcard.txt");
-	system("echo \":\r\n\" >> /tmp/speedtfcard.txt");
-	system("echo \"tf card speed test read 100M:\r\n\" >> /tmp/speedtfcard.txt");
-	system("sudo sh -c \"sync && echo 3 > /proc/sys/vm/drop_caches\"");
-	system("sudo dd if=./largefile of=/dev/null bs=100M 2>>/tmp/speedtfcard.txt");
+	printf("***********************sdcard speed test**************************\r\n");
+	if(flag)
+	{
+		app_dd_speed_test("/tmp/sdcard", NULL);
+	}
+	else 
+	{
+		system("echo \"[BSZH_Module_Result]tf card speed test**************************\r\n\" > /tmp/speedtfcard.txt");
+		app_dd_speed_test("/tmp/sdcard", "/tmp/speedtfcard.txt");
+	}
 	return 0;
 }
 

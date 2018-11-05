@@ -27,6 +27,8 @@ extern int bndriver_file_add(char *file, char *buf, int len);
 extern int bndriver_file_getsize(char *file);
 extern int bndriver_file_read(char *file, char *buf, int offset, int len);
 extern int bndriver_file_context_num(char *file);
+extern int bndriver_get_dd_speed_num(char *buf, int len, double *para1, double *para2);
+extern int bndriver_get_iperf_speed_num(char *buf, int len, double *para1, double *para2);
 
 //net
 extern int bndriver_check_wlan(void);

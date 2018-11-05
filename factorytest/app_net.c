@@ -49,9 +49,16 @@ int app_lan_test(int pingcount)
 	system("sudo ifconfig eth0 down");
 
 	system("sudo ifconfig eth0 up");
-	bndriver_secondSleep(2);
+	bndriver_secondSleep(8);
 
-	if(bndriver_check_lan() >= 0)
+	for(i = 0; i < 5; i++)
+	{
+		if(bndriver_check_lan() >= 0)
+		{
+			break;
+		}
+	}
+	if(i < 5)
 	{
 		bndriver_secondSleep(2);
 		printf("satrt eth0 ping %s\n", g_config_service_ip);
@@ -107,15 +114,16 @@ int app_wifi_test(int pingcount)
 int app_lan_speed_test(void)
 {
 	char cmd_buf[128];
-	system("echo \"***********************lan speed test**************************\r\n\" > /tmp/speedlan.txt");
+	system("echo \"[BSZH_Module_Result]lan speed test**************************\r\n\" > /tmp/speedlan.txt");
 	if(app_lan_test(2) < 0)
 	{
 		system("echo \"lan speed fail\r\n\" >> /tmp/speedlan.txt");
+		printf("\033[1;31;40m [fail] test lan speed fail\033[0m \n");
 		return -1;
 	}
 	memset(cmd_buf, 0, sizeof(cmd_buf));
-	printf("satrt test lan iperf 180s\n");
-	sprintf(cmd_buf, "iperf -c %s -d -t 180 >> /tmp/speedlan.txt", g_config_service_ip);
+	printf("satrt test lan iperf, wait...\n");
+	sprintf(cmd_buf, "iperf -c %s -d -t 60 >> /tmp/speedlan.txt", g_config_service_ip);
 	system(cmd_buf);
 
 	return 0;
@@ -124,15 +132,16 @@ int app_lan_speed_test(void)
 int app_wifi_speed_test(void)
 {
 	char cmd_buf[128];
-	system("echo \"**********************wifi speed test*************************\r\n\" > /tmp/speedwifi.txt");
+	system("echo \"[BSZH_Module_Result]wifi speed test*************************\r\n\" > /tmp/speedwifi.txt");
 	if(app_wifi_test(2) < 0)
 	{
 		system("echo \"wifi speed fail\r\n\" >> /tmp/speedwifi.txt");
+		printf("\033[1;31;40m [fail] test wifi speed fail\033[0m \n");
 		return -1;
 	}
 	memset(cmd_buf, 0, sizeof(cmd_buf));
-	printf("satrt test wifi iperf 180s\n");
-	sprintf(cmd_buf, "iperf -c %s -d -t 180 >> /tmp/speedwifi.txt", g_config_service_ip);
+	printf("satrt test wifi iperf, wait...\n");
+	sprintf(cmd_buf, "iperf -c %s -d -t 60 >> /tmp/speedwifi.txt", g_config_service_ip);
 	system(cmd_buf);
 
 	return 0;
