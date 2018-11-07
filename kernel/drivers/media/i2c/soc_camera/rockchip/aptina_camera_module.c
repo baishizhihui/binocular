@@ -389,6 +389,11 @@ static int aptina_camera_module_write_config(
 		goto err;
 	}
 
+	if (!IS_ERR_OR_NULL(cam_mod->custom.set_flip))
+		cam_mod->custom.set_flip(cam_mod,
+		cam_mod->active_config->reg_table,
+		cam_mod->active_config->reg_table_num_entries);
+
 	ret = aptina_write_reglist(&cam_mod->sd,
 		cam_mod->active_config->reg_table,
 		cam_mod->active_config->reg_table_num_entries);
