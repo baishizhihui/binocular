@@ -872,10 +872,10 @@
 		as-master = <1>; //master
 	};
 
-	camera2: camera-module@18 {
+	camera2: camera-module@10 {
 		status = "okay";
 		compatible = "aptina,ar0144cs-v4l2-i2c-subdev";
-		reg = <0x18>;
+		reg = <0x10>;
 		device_type = "v4l2-i2c-subdev";
 		clocks = <&cru SCLK_CIF_OUT>;
 		clock-names = "clk_cif_out";
@@ -903,13 +903,13 @@
 		rockchip,camera-module-mipi-dphy-index = <0>;
 	};
 
-	camera3: camera-module@10 {
+	camera3: camera-module@18 {
 		status = "okay";
 		compatible = "aptina,ar0144cs-v4l2-i2c-subdev";
-		reg = <0x10>;
+		reg = <0x18>;
 		device_type = "v4l2-i2c-subdev";
-		pinctrl-0 = <&cam1_default_pins>;
-		pinctrl-1 = <&cam1_sleep_pins>;
+		//pinctrl-0 = <&cam1_default_pins>;
+		//pinctrl-1 = <&cam1_sleep_pins>;
 		/*Note: HW mclk share with camera2, camera2 control init
 		 * and don't close it.
 		 */

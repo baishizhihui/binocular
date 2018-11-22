@@ -135,7 +135,7 @@ static struct aptina_camera_module_config ar0144cs_configs[] = {
 		.frm_fmt = {
 			.width = 1280,
 			.height = 800,
-			.code = MEDIA_BUS_FMT_SGRBG12_1X12
+			.code = MEDIA_BUS_FMT_SGRBG12_1X12//MEDIA_BUS_FMT_Y12_1X12//
 		},
 		.frm_intrvl = {
 			.interval = {
