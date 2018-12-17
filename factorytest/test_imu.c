@@ -43,42 +43,6 @@ extern char g_config_sn[64];
 
 int test_init(char *id)
 {
-	int size;
-	printf("\033[1;31;40m factory test for baidu V1.0 - ID:%s\033[0m\n", id);
-	memset(g_board_id, 0, sizeof(g_board_id));
-	//strcpy(g_board_id, id);
-	size = bndriver_file_getsize("/home/linaro/id.txt");
-	if(size)
-		bndriver_file_read("/home/linaro/id.txt", g_board_id, 0, size);
-
-	app_gpio_init();
-
-	memset(g_config_service_ip, 0, sizeof(g_config_service_ip));
-	memset(g_config_wifi_name, 0, sizeof(g_config_wifi_name));
-	memset(g_config_wifi_pwd, 0, sizeof(g_config_wifi_pwd));
-	memset(g_config_lan_ip, 0, sizeof(g_config_lan_ip));
-	memset(g_config_wifi_ip, 0, sizeof(g_config_wifi_ip));
-	memset(g_config_wifi_gw, 0, sizeof(g_config_wifi_gw));
-
-	size = bndriver_file_getsize("/home/linaro/ip.txt");
-	if(size)
-		bndriver_file_read("/home/linaro/ip.txt", g_config_service_ip, 0, size);	
-
-	memset(g_board_test_outfile, 0, sizeof(g_board_test_outfile));
-	sprintf(g_board_test_outfile, "%s-%s.txt", PATH_AUTOTEST_RESULT_FILE, g_board_id);
-	printf("%s\n", g_board_test_outfile);
-
-	memset(g_board_speed_outfile, 0, sizeof(g_board_speed_outfile));
-	sprintf(g_board_speed_outfile, "%s-%s-speed.txt", PATH_AUTOTEST_RESULT_FILE, g_board_id);
-	printf("%s\n", g_board_speed_outfile);
-
-	printf("\033[1;32;40m config: \033[0m\n");	
-	printf("\033[1;32;40m service ip=%s \033[0m\n",g_config_service_ip);
-
-	if(app_lan_update_time() <= 0)
-	{
-		printf("\033[1;31;40m update time fail \033[0m\n");
-	}
 
 	return 1;
 }
@@ -103,7 +67,7 @@ void auto_test_timer_callback(void)
 
 int test_main(int arg)
 {
-	test_burn_in_running();
+	board_function_test(TEST_FUN_IMU, NULL);
 	return 1;	
 }
 
