@@ -20,6 +20,9 @@
 #include <linux/workqueue.h>
 #include <linux/platform_data/rk_isp10_platform_camera_module.h>
 #include <linux/platform_data/rk_isp10_platform.h>
+#include <linux/gpio/consumer.h>
+#include <linux/gpio.h>
+
 /*
  * TODO: references to v4l2 should be reomved from here and go into a
  * platform dependent wrapper
@@ -198,6 +201,7 @@ struct aptina_camera_module {
 	void *pltfm_data;
 	bool inited;
 	struct mutex lock;
+	struct gpio_desc *pwm_gpio;
 };
 
 #define aptina_camera_module_pr_info(cam_mod, fmt, arg...) \

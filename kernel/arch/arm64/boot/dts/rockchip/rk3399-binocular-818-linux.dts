@@ -483,7 +483,7 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&rgmii_pins>;
 	tx_delay = <0x28>;
-	rx_delay = <0x11>;
+	rx_delay = <0x08>;
 	status = "okay";
 };
 

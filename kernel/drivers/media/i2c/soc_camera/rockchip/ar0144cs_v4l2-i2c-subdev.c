@@ -52,7 +52,7 @@
 #define AR0144CS_VERTICAL_END_REG 0x3006
 
 #define AR0144CS_READOUT_FLIP_MIRROR_REG 0x3040
-//#define dual_sync
+#define dual_sync
 
 static struct aptina_camera_module ar0144cs[2];
 static struct aptina_camera_module_custom_config ar0144cs_custom_config;
@@ -276,6 +276,7 @@ static int ar0144cs_set_vts(struct aptina_camera_module *cam_mod,
 static int ar0144cs_write_aec(struct aptina_camera_module *cam_mod)
 {
 	int ret = 0;
+	u32 state, stream;
 	struct i2c_client *client = v4l2_get_subdevdata(&cam_mod->sd);
 	aptina_camera_module_pr_debug(cam_mod,
 		"i2c:0x%x, exp_time = %d, gain = %d\n",
@@ -344,6 +345,11 @@ static int ar0144cs_write_aec(struct aptina_camera_module *cam_mod)
 			ret |= aptina_camera_module_write_reg(cam_mod,
 			0x3022, 0x00);
 		mutex_unlock(&cam_mod->lock);
+		ret = aptina_camera_module_read_reg(cam_mod, 2, 0x3026, &state);
+		ret = aptina_camera_module_read_reg(cam_mod, 2, 0x301a, &stream);
+		aptina_camera_module_pr_info(cam_mod,
+		"i2c:0x%x active mode = 0x%04x in state = 0x%04x\n",
+		client->addr, stream, state);
 	}
 
 	if (IS_ERR_VALUE(ret))
@@ -529,6 +535,7 @@ static int ar0144cs_s_ext_ctrls(struct aptina_camera_module *cam_mod,
 static int ar0144cs_start_streaming(struct aptina_camera_module *cam_mod)
 {
 		int ret = 0;
+		u32 stream, state;
 		struct i2c_client *client = v4l2_get_subdevdata(&cam_mod->sd);
 		aptina_camera_module_pr_info(cam_mod,
 		"i2c:0x%x active config=%s\n",
@@ -538,14 +545,40 @@ static int ar0144cs_start_streaming(struct aptina_camera_module *cam_mod)
 		ret = ar0144cs_g_vts(cam_mod, &cam_mod->vts_min);
 		if (IS_ERR_VALUE(ret))
 			goto err;
-	//#ifdef dual_sync 
+	#ifdef dual_sync 
 		mutex_lock(&cam_mod->lock);
-		//ret = aptina_camera_module_write_reg(cam_mod, 0x301a, 0x0958);
-		ret = aptina_camera_module_write_reg(cam_mod, 0x301a, 0x005C);
+		ret = aptina_camera_module_write_reg(cam_mod, 0x301a, 0x0958);
+		//ret = aptina_camera_module_write_reg(cam_mod, 0x301a, 0x005C);
 		mutex_unlock(&cam_mod->lock);
-	//#else
-	//	ret = aptina_camera_module_write_reg(cam_mod, 0x301a, 0x005c);
-	//#endif
+	#else
+		ret = aptina_camera_module_write_reg(cam_mod, 0x301a, 0x005c);
+	#endif
+
+		ret = aptina_camera_module_read_reg(cam_mod, 2, 0x3026, &state);
+		ret = aptina_camera_module_read_reg(cam_mod, 2, 0x301a, &stream);
+		aptina_camera_module_pr_info(cam_mod,
+		"i2c:0x%x active mode = 0x%04x in state = 0x%04x\n",
+		client->addr, stream, state);
+#if 0
+	if(client->addr == 0x10) {
+		if (cnt == 0) {
+
+		cam_mod->pwm_gpio = gpio_request_one(&client->dev, "pwm", GPIOD_OUT_LOW);
+		dev_info(&client->dev, "IS_ERR(ar0144cs[i].pwm_gpio = %d\n",IS_ERR(cam_mod->pwm_gpio));
+			if (IS_ERR(cam_mod->pwm_gpio)) {
+				dev_info(&client->dev, "Failed to get pwm-gpios\n");
+		}
+	if (!IS_ERR(cam_mod->pwm_gpio)){
+		ret = gpiod_direction_output(cam_mod->pwm_gpio, 1);
+		printk("gpiod_direction_output = %d\n",ret);
+	}
+	cnt++;
+} else {
+	//if (!IS_ERR(cam_mod->pwm_gpio))
+		ret = gpiod_direction_output(cam_mod->pwm_gpio, 1);
+		printk("gpiod_direction_output1 = %d\n",ret);}
+}
+#endif
 	
 
 		if (IS_ERR_VALUE(ret))
@@ -567,14 +600,24 @@ static int ar0144cs_stop_streaming(struct aptina_camera_module *cam_mod)
 {
 		int ret = 0;
 	
-		aptina_camera_module_pr_info(cam_mod, "\n");
+		//aptina_camera_module_pr_info(cam_mod, "\n");
+		struct i2c_client *client = v4l2_get_subdevdata(&cam_mod->sd);
+		aptina_camera_module_pr_info(cam_mod,"i2c:0x%x active config=%s\n",
+		client->addr, cam_mod->active_config->name);	
+		//if (!IS_ERR(cam_mod->pwm_gpio))
+
 		mutex_lock(&cam_mod->lock);
 		ret = aptina_camera_module_write_reg(cam_mod, 0x301a, 0x0058);
 		mutex_unlock(&cam_mod->lock);
 		if (IS_ERR_VALUE(ret))
 			goto err;
 
-		msleep(25);
+		#if 0
+		if(client->addr == 0x10) {
+		ret = gpiod_direction_output(cam_mod->pwm_gpio, 0);
+		printk(">>>gpiod_direction_output2 = %d\n",ret);}
+		#endif
+		//msleep(25);
 	
 		return 0;
 	err:

@@ -45,6 +45,7 @@
 #define OF_OV_GPIO_FLASH "rockchip,flash-gpio"
 #define OF_OV_GPIO_TORCH "rockchip,torch-gpio"
 #define OF_OV_GPIO_RESET "rockchip,rst-gpio"
+#define OF_OV_GPIO_PWM "rockchip,pwm-gpio"
 
 #define OF_CAMERA_MODULE_NAME "rockchip,camera-module-name"
 #define OF_CAMERA_MODULE_LEN_NAME "rockchip,camera-module-len-name"
@@ -80,6 +81,7 @@ const char *PLTFRM_CAMERA_MODULE_PIN_PWR_3RD = OF_OV_GPIO_PWR_3RD;
 const char *PLTFRM_CAMERA_MODULE_PIN_FLASH = OF_OV_GPIO_FLASH;
 const char *PLTFRM_CAMERA_MODULE_PIN_TORCH = OF_OV_GPIO_TORCH;
 const char *PLTFRM_CAMERA_MODULE_PIN_RESET = OF_OV_GPIO_RESET;
+const char *PLTFRM_CAMERA_MODULE_PIN_PWM = OF_OV_GPIO_PWM;
 
 #define I2C_M_WR 0
 #define I2C_MSG_MAX 300
@@ -156,7 +158,7 @@ struct pltfrm_camera_module_itf {
 };
 
 struct pltfrm_camera_module_data {
-	struct pltfrm_camera_module_gpio gpios[8];
+	struct pltfrm_camera_module_gpio gpios[9];
 	struct pinctrl *pinctrl;
 	struct pinctrl_state *pins_default;
 	struct pinctrl_state *pins_sleep;
@@ -226,7 +228,7 @@ static int pltfrm_camera_module_init_gpio(
 				pdata->fl_ctrl.fl_init_status = 1;
 			}
 
-			pltfrm_camera_module_pr_debug(
+			pltfrm_camera_module_pr_info(
 			    sd,
 				"requesting GPIO #%d ('%s')\n",
 				pdata->gpios[i].pltfrm_gpio,
@@ -236,10 +238,9 @@ static int pltfrm_camera_module_init_gpio(
 				GPIOF_DIR_OUT,
 				pdata->gpios[i].label);
 			if (ret) {
-				if ((pdata->gpios[i].label ==
-					PLTFRM_CAMERA_MODULE_PIN_RESET) ||
-					(pdata->gpios[i].label ==
-					PLTFRM_CAMERA_MODULE_PIN_PWR)) {
+				if ((pdata->gpios[i].label == PLTFRM_CAMERA_MODULE_PIN_RESET) ||
+					(pdata->gpios[i].label == PLTFRM_CAMERA_MODULE_PIN_PWR_2ND) ||
+					(pdata->gpios[i].label == PLTFRM_CAMERA_MODULE_PIN_PWR)) {
 					pltfrm_camera_module_pr_warn(sd,
 					"GPIO #%d ('%s') may be reused!\n",
 					pdata->gpios[i].pltfrm_gpio,
@@ -260,6 +261,16 @@ static int pltfrm_camera_module_init_gpio(
 				PLTFRM_CAMERA_MODULE_PIN_STATE_INACTIVE);
 			else if (pdata->gpios[i].label ==
 				PLTFRM_CAMERA_MODULE_PIN_RESET)
+				ret = pltfrm_camera_module_set_pin_state(sd,
+					pdata->gpios[i].label,
+					PLTFRM_CAMERA_MODULE_PIN_STATE_ACTIVE);
+			else if (pdata->gpios[i].label ==
+				PLTFRM_CAMERA_MODULE_PIN_PWR)
+				ret = pltfrm_camera_module_set_pin_state(sd,
+					pdata->gpios[i].label,
+					PLTFRM_CAMERA_MODULE_PIN_STATE_ACTIVE);
+			else if (pdata->gpios[i].label ==
+				PLTFRM_CAMERA_MODULE_PIN_PWR_2ND)
 				ret = pltfrm_camera_module_set_pin_state(sd,
 					pdata->gpios[i].label,
 					PLTFRM_CAMERA_MODULE_PIN_STATE_ACTIVE);
@@ -521,6 +532,13 @@ static struct pltfrm_camera_module_data *pltfrm_camera_module_get_data(
 		pdata->gpios[6].label,
 		0,
 		&pdata->gpios[6].active_low);
+
+	pdata->gpios[7].label = PLTFRM_CAMERA_MODULE_PIN_PWM;
+	pdata->gpios[7].pltfrm_gpio = of_get_named_gpio_flags(
+		np,
+		pdata->gpios[7].label,
+		0,
+		&pdata->gpios[7].active_low);
 
 	ret = of_property_read_string(np, OF_CAMERA_MODULE_NAME,
 			&pdata->info.module_name);
@@ -1438,7 +1456,7 @@ int pltfrm_camera_module_set_pm_state(
 						"regulator_enable failed!\n");
 			}
 		}
-
+#if 0
 		pltfrm_camera_module_set_pin_state(
 			sd,
 			PLTFRM_CAMERA_MODULE_PIN_PWR,
@@ -1453,11 +1471,19 @@ int pltfrm_camera_module_set_pm_state(
 			sd,
 			PLTFRM_CAMERA_MODULE_PIN_PWR_3RD,
 			PLTFRM_CAMERA_MODULE_PIN_STATE_ACTIVE);
-
+#endif
 		//pltfrm_camera_module_set_pin_state(
 		//	sd,
 		//	PLTFRM_CAMERA_MODULE_PIN_RESET,
 		//	PLTFRM_CAMERA_MODULE_PIN_STATE_ACTIVE);
+		pltfrm_camera_module_set_pin_state(
+			sd,
+			PLTFRM_CAMERA_MODULE_PIN_PWR,
+			PLTFRM_CAMERA_MODULE_PIN_STATE_INACTIVE);
+		pltfrm_camera_module_set_pin_state(
+			sd,
+			PLTFRM_CAMERA_MODULE_PIN_PWR_2ND,
+			PLTFRM_CAMERA_MODULE_PIN_STATE_INACTIVE);
 		usleep_range(100, 300);
 		pltfrm_camera_module_set_pin_state(
 			sd,
@@ -1505,6 +1531,12 @@ int pltfrm_camera_module_set_pm_state(
 			PLTFRM_CAMERA_MODULE_PIN_PWR,
 			PLTFRM_CAMERA_MODULE_PIN_STATE_INACTIVE);
 #endif
+
+		pltfrm_camera_module_set_pin_state(
+			sd,
+			PLTFRM_CAMERA_MODULE_PIN_PWM,
+			PLTFRM_CAMERA_MODULE_PIN_STATE_INACTIVE);
+
 		if (pdata->regulators.regulator) {
 			for (i = 0; i < pdata->regulators.cnt; i++) {
 				struct pltfrm_camera_module_regulator
@@ -1543,7 +1575,7 @@ int pltfrm_camera_module_set_pin_state(
 				gpio_val = (pdata->gpios[i].active_low ==
 					OF_GPIO_ACTIVE_LOW) ? 1 : 0;
 			gpio_set_value(pdata->gpios[i].pltfrm_gpio, gpio_val);
-			pltfrm_camera_module_pr_debug(sd,
+			pltfrm_camera_module_pr_info(sd,
 				"set GPIO #%d ('%s') to %s\n",
 				pdata->gpios[i].pltfrm_gpio,
 				pdata->gpios[i].label,
@@ -1601,7 +1633,7 @@ int pltfrm_camera_module_s_power(
 	struct pltfrm_camera_module_data *pdata =
 		dev_get_platdata(&client->dev);
 
-	pltfrm_camera_module_pr_debug(sd, "%s\n", on ? "on" : "off");
+	pltfrm_camera_module_pr_info(sd, "%s\n", on ? "on" : "off");
 
 	if (on) {
 		/* Enable clock and voltage to Secondary Camera Sensor */

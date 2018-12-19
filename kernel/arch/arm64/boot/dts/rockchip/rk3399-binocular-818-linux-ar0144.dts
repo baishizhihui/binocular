@@ -885,8 +885,9 @@
 		pinctrl-1 = <&cam0_sleep_pins>;
 		/*this for RX0 and HDMI-IN switch*/
 		/*rockchip,pwr-gpio = <&gpio2 RK_PB0 GPIO_ACTIVE_HIGH>;*/
-		rockchip,pd-gpio = <&gpio2 RK_PA7 GPIO_ACTIVE_LOW>;
-		rockchip,rst-gpio = <&gpio2 RK_PA6 GPIO_ACTIVE_HIGH>;
+		/*rockchip,pwr-gpio = <&gpio4 RK_PC2 GPIO_ACTIVE_HIGH>;*/
+       		rockchip,pd-gpio = <&gpio4 RK_PA5 GPIO_ACTIVE_LOW>;
+		rockchip,rst-gpio = <&gpio4 RK_PA7 GPIO_ACTIVE_HIGH>;
 		rockchip,camera-module-mclk-name = "clk_cif_out";
 		rockchip,camera-module-facing = "back";
 		rockchip,camera-module-name = "MDG001";
@@ -917,14 +918,16 @@
                 clock-names = "clk_cif_out";
                 pinctrl-names = "rockchip,camera_default",
                                 "rockchip,camera_sleep";
-                pinctrl-0 = <&cam0_default_pins>;
-                pinctrl-1 = <&cam0_sleep_pins>;
+                //pinctrl-0 = <&cam0_default_pins>;
+                //pinctrl-1 = <&cam0_sleep_pins>;
                 //rockchip,pd-gpio = <&gpio2 RK_PB4 GPIO_ACTIVE_HIGH>;
                 //rockchip,rst-gpio = <&gpio2 RK_PA1 GPIO_ACTIVE_HIGH>;
                 rockchip,camera-module-mclk-name = "clk_cif_out";*/
 
-       	rockchip,pd-gpio = <&gpio4 RK_PA5 GPIO_ACTIVE_LOW>;
-		rockchip,rst-gpio = <&gpio4 RK_PA7 GPIO_ACTIVE_HIGH>;
+		rockchip,pwr-gpio = <&gpio4 RK_PC2 GPIO_ACTIVE_HIGH>;
+		rockchip,pwr-2nd-gpio = <&gpio2 RK_PB0 GPIO_ACTIVE_HIGH>;
+		rockchip,pd-gpio = <&gpio2 RK_PA7 GPIO_ACTIVE_LOW>;
+		rockchip,rst-gpio = <&gpio2 RK_PA6 GPIO_ACTIVE_HIGH>;
 		rockchip,camera-module-facing = "back";
 		rockchip,camera-module-name = "MDG001";
 		rockchip,camera-module-len-name = "NONE";
@@ -1016,7 +1019,7 @@
 };
 
 &pwm0 {
-	status = "okay";
+	status = "disabled";
 };
 
 &pwm2 {
@@ -1233,6 +1236,14 @@
 };
 
 &pinctrl {
+	pinctrl-names = "default";
+	pinctrl-0 = <&camera_ctrl_gpio0>;
+
+	camera_ctrl_gpio {
+		camera_ctrl_gpio0: camera_ctrl_gpio0 {
+			rockchip,pins = <4 RK_PC2 RK_FUNC_GPIO &pcfg_pull_down>,<2 RK_PB0 RK_FUNC_GPIO &pcfg_pull_down>;
+		};
+	};
 
 	buttons {
 		pwrbtn: pwrbtn {
