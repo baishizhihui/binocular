@@ -169,11 +169,17 @@ int app_dd_speed_test(char *path, char *outputfile)
 	if(outputfile == NULL)
 	{
 		printf("speed test write:\r\n");
-		system("sudo time dd if=/dev/zero of=./largefile bs=64k count=16k conv=fdatasync");// oflag=dsync
+		//system("sudo time dd if=/dev/zero of=./largefile bs=64k count=16k conv=fdatasync");// oflag=dsync
+		memset(buf, 0, sizeof(buf));
+		sprintf(buf, "sudo dd if=/dev/zero of=%s/largefile bs=64k count=4k conv=fdatasync", path);	
+		system(buf);
 		printf(" \r\n");
 		printf("speed test read:\r\n");
 		system("sudo sh -c \"sync && echo 3 > /proc/sys/vm/drop_caches\"");
-		system("sudo dd if=./largefile of=/dev/null bs=64k");
+		//system("sudo dd if=./largefile of=/dev/null bs=64k");
+		memset(buf, 0, sizeof(buf));
+		sprintf(buf, "sudo dd if=%s/largefile of=/dev/null bs=64k", path);	
+		system(buf);
 	}
 	else
 	{
@@ -183,7 +189,7 @@ int app_dd_speed_test(char *path, char *outputfile)
 
 		memset(buf, 0, sizeof(buf));
 		//system("sudo dd if=/dev/zero of=./largefile bs=64k count=4k");// oflag=dsync
-		sprintf(buf, "sudo dd if=/dev/zero of=./largefile bs=64k count=16k conv=fdatasync 2>>%s", outputfile);	
+		sprintf(buf, "sudo dd if=/dev/zero of=%s/largefile bs=64k count=4k conv=fdatasync 2>>%s", path, outputfile);
 		system(buf);
 
 		memset(buf, 0, sizeof(buf));
@@ -192,7 +198,7 @@ int app_dd_speed_test(char *path, char *outputfile)
 
 		system("sudo sh -c \"sync && echo 3 > /proc/sys/vm/drop_caches\"");
 		memset(buf, 0, sizeof(buf));
-		sprintf(buf, "sudo dd if=./largefile of=/dev/null bs=64k 2>>%s", outputfile);	
+		sprintf(buf, "sudo dd if=%s/largefile of=/dev/null bs=64k 2>>%s", path, outputfile);
 		system(buf);
 	}
 	return 0;

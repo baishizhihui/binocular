@@ -188,7 +188,7 @@ int test_main(int arg)
 		else if(2 == a)
 		{
 			printf("\033[1;32;40m *********************************** \033[0m\n");
-			printf("\033[1;31;40m *  start test all...... \033[0m\n");		
+			printf("\033[1;31;40m *  start test all & performance...... \033[0m\n");		
 			printf("\033[1;32;40m *********************************** \033[0m\n");
 			auto_test_init();
 			app_fan_set(1);
@@ -332,6 +332,7 @@ int test_main(int arg)
 	return 1;	
 }
 
+extern int app_emmc_speed_test(int flag);
 int test_main_function(int cmd)
 {
 	int a,b;
@@ -354,7 +355,8 @@ int test_main_function(int cmd)
 		printf("\033[1;32;40m *  4. test usb all \033[0m\n");
 		printf("\033[1;32;40m *  5. test tf card \033[0m\n");
 		printf("\033[1;32;40m *  6. test lan \033[0m\n");
-		printf("\033[1;32;40m *  7. test wifi \033[0m\n");					
+		printf("\033[1;32;40m *  7. test wifi \033[0m\n");
+		printf("\033[1;32;40m *  8. test emmc speed\033[0m\n");						
 		printf("\033[1;32;40m *  0. test exit \033[1m\n");
 		printf("\033[1;32;40m *********************************** \033[0m\n");	
 		printf("\033[1;32;40m # \033[0m");
@@ -465,6 +467,11 @@ int test_main_function(int cmd)
 				break;
 			}
 			printf("\033[1;31;40m [fail] test wifi\033[0m \n");			
+		}
+		else if(8 == a)
+		{
+			app_emmc_speed_test(1);
+			printf("[success] test emmc success\n");;			
 		}
 		else if(86 == a)
 		{
