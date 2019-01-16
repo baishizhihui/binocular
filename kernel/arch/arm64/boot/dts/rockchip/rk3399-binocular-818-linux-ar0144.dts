@@ -897,8 +897,8 @@
 		rockchip,camera-module-orientation = <0>;
 		rockchip,camera-module-iq-flip = <0>;
 		rockchip,camera-module-iq-mirror = <0>;
-		rockchip,camera-module-flip = <1>;
-		rockchip,camera-module-mirror = <1>;
+		rockchip,camera-module-flip = <0>;
+		rockchip,camera-module-mirror = <0>;
 		rockchip,camera-module-defrect0 = <1280 800 0 0 1280 800>;
 		rockchip,camera-module-flash-support = <0>;
 		rockchip,camera-module-mipi-dphy-index = <0>;
@@ -936,8 +936,8 @@
 		rockchip,camera-module-orientation = <0>;
 		rockchip,camera-module-iq-flip = <0>;
 		rockchip,camera-module-iq-mirror = <0>;
-		rockchip,camera-module-flip = <0>;
-		rockchip,camera-module-mirror = <0>;
+		rockchip,camera-module-flip = <1>;
+		rockchip,camera-module-mirror = <1>;
 		rockchip,camera-module-defrect0 = <1280 800 0 0 1280 800>;
 		rockchip,camera-module-flash-support = <0>;
 		rockchip,camera-module-mipi-dphy-index = <1>;
