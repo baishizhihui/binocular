@@ -686,6 +686,9 @@ int aptina_camera_module_s_stream(struct v4l2_subdev *sd, int enable)
 		ret = pltfrm_camera_module_set_pin_state(&cam_mod->sd,
 				PLTFRM_CAMERA_MODULE_PIN_PWM,
 				PLTFRM_CAMERA_MODULE_PIN_STATE_ACTIVE);
+		ret = pltfrm_camera_module_set_pin_state(&cam_mod->sd,
+				PLTFRM_CAMERA_MODULE_PIN_PWR_2ND,
+				PLTFRM_CAMERA_MODULE_PIN_STATE_ACTIVE);
 
 		if (cam_mod->frm_intrvl_valid) {
 			if ((cam_mod->frm_intrvl.interval.numerator !=
@@ -857,7 +860,10 @@ int aptina_camera_module_s_power(struct v4l2_subdev *sd, int on)
 				&cam_mod->sd,
 				PLTFRM_CAMERA_MODULE_PIN_PWM,
 				PLTFRM_CAMERA_MODULE_PIN_STATE_INACTIVE);
-
+			ret = pltfrm_camera_module_set_pin_state(
+				&cam_mod->sd,
+				PLTFRM_CAMERA_MODULE_PIN_PWR_2ND,
+				PLTFRM_CAMERA_MODULE_PIN_STATE_INACTIVE);
 			if (!IS_ERR_VALUE(ret))
 				cam_mod->state =
 				APTINA_CAMERA_MODULE_HW_STANDBY;
